@@ -2,7 +2,7 @@
 
 [中文说明](README.zh-CN.md)
 
-This repository contains a reusable Codex skill for planning and producing multi-shot AI short films without losing character identity, voice identity, props, locations, or shot continuity.
+This repository contains a reusable skill for planning and producing multi-shot AI short films without losing character identity, voice identity, props, locations, or shot continuity.
 
 It grew out of a practical node-canvas production workflow in which every short shot is generated independently, every shot reconnects its character and scene references, predecessor frames control composition only, narration and dialogue are generated separately, and the final edit replaces all native video audio.
 
