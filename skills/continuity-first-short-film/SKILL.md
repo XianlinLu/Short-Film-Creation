@@ -1,6 +1,6 @@
 ---
 name: continuity-first-short-film
-description: Create or repair AI short-film workflows built from independently generated short shots, per-shot character and scene references, composition-only tail frames, separately generated narration and dialogue, and final soundtrack replacement. Use from an idea, a finished script, or existing generated videos.
+description: Create or repair AI short-film workflows using independent short shots by default and controlled native video continuation when eligible, while reattaching locked character and scene references, preserving approved character voices, separating narration and dialogue, and replacing native video audio in the final edit. Use from an idea, a finished script, or existing generated videos.
 ---
 
 # Continuity-First Short Film
@@ -11,15 +11,16 @@ Build the production around locked assets and explicit gates. Treat model output
 
 Always preserve this workflow unless the user explicitly changes it:
 
-1. Split the film into short atomic shots and generate every shot independently.
-2. Reconnect the locked character image and locked scene image on every shot. Add only the prop references that shot needs.
-3. Use a predecessor tail frame only to continue composition, camera position, pose, and spatial layout. A tail frame never controls character identity, costume, scene identity, or prop identity and never replaces their locked references.
-4. Generate narration and character dialogue as separate approved audio assets. If both occur over the same picture, keep them as separate tracks or nodes.
-5. Treat every video model soundtrack as temporary. Mute or remove it in final post-production and replace it with the approved narration and dialogue, then add controlled ambience, sound effects, and music.
+1. Split the film into short atomic shots. Generate shots independently by default; use native video continuation only after the shot passes the continuation gate.
+2. Reconnect the locked character image and locked scene image on every independent or continued shot. Add only the prop references that shot needs.
+3. Treat a predecessor video or tail frame as continuity input only. It may control motion, composition, camera position, pose, pacing, and spatial layout, but never replaces locked character, costume, scene, or prop references.
+4. Generate narration and character dialogue as separate approved audio assets. Reconnect the locked character voice or approved shot audio when a continued dialogue shot needs lip-sync conditioning. If narration and dialogue occur over the same picture, keep them as separate tracks or nodes.
+5. Treat every video model soundtrack, including the soundtrack returned by video continuation, as temporary. Mute or remove it in final post-production and replace it with the approved narration and dialogue, then add controlled ambience, sound effects, and music.
 
 ## Route the task
 
 - For a new project or a full production plan, read [references/workflow.md](references/workflow.md).
+- Before using a video model's continuation or extension feature, read [references/video-continuation.md](references/video-continuation.md).
 - To choose the correct starting path for an idea, a script, or existing videos, read [references/entry-scenarios.md](references/entry-scenarios.md).
 - When creating or repairing manifests, registries, IDs, or statuses, read [references/production-schema.md](references/production-schema.md).
 - When the user needs copy-ready instructions for a canvas agent, read [references/prompt-templates.md](references/prompt-templates.md).
@@ -53,6 +54,8 @@ Do not infer missing rows from a summary-only manifest. Recover or create a comp
 - Use a real final stable frame for composition continuity only. Even when a tail frame is present, reconnect the locked character, scene, and prop references for the new shot. Never substitute an entire video, a similar image, or a newly generated approximation.
 - Do not mark subjective quality as approved without explicit human review.
 - Do not regenerate locked assets or successful shots to fix an unrelated failure.
+- Do not treat ordinary reference-video generation as native continuation. Inspect the live component and record whether the mode is `NATIVE_CONTINUATION` or `VIDEO_REFERENCE`.
+- Do not chain continuation automatically. Human-review and lock each result before it becomes the source of the next continuation.
 
 ## Separate the gates
 
@@ -69,8 +72,8 @@ Prefer scene-local batches of up to roughly six atomic shots unless the user cho
 1. Preflight against the canonical manifest and asset registry.
 2. Generate and verify dry voices.
 3. Wait for human audio approval.
-4. Resolve missing props and tail frames.
-5. Generate the currently executable videos.
+4. Resolve missing props and choose `INDEPENDENT` or `NATIVE_CONTINUATION` for each shot. Use a tail frame only when continuation is unavailable and hard composition continuity still requires it.
+5. Generate the currently executable videos, always reattaching locked identity and scene references.
 6. Wait for human visual, identity, voice, and lip-sync approval.
 7. Lock approved outputs and record post-production audio requirements.
 
@@ -78,7 +81,7 @@ If the canvas runs video jobs asynchronously, submit the intended scope, stop, t
 
 ## Adapt to actual tool capabilities
 
-Inspect the live model schema and available components rather than assuming support for frame extraction, lip sync, audio replacement, or AV muxing. If a component is unavailable, record an explicit external post-production requirement instead of pretending the canvas completed it.
+Inspect the live model schema and available components rather than assuming support for native continuation, frame extraction, lip sync, audio replacement, or AV muxing. A video-input port alone does not prove native continuation. If a component is unavailable, record an explicit fallback or external post-production requirement instead of pretending the canvas completed it.
 
 When video generation needs approved audio for lip sync, the resulting video soundtrack remains temporary. Preserve the locked narration and dialogue sources, mute native video audio, and replace it during final editing.
 

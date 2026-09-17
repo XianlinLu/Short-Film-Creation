@@ -1,6 +1,6 @@
 # End-to-End Workflow
 
-Use this reference when starting, auditing, or resuming a multi-shot AI short film. Every path uses independently generated short shots. Each shot receives its locked character and scene references again; a predecessor frame controls composition only.
+Use this reference when starting, auditing, or resuming a multi-shot AI short film. Every path uses short atomic shots. Independent generation is the default; native video continuation is allowed only for direct same-scene continuity after it passes the controlled-continuation gate. Every shot receives its locked character and scene references again.
 
 ## 1. Audit the current project
 
@@ -15,6 +15,9 @@ Inventory the script, node graph, existing outputs, model settings, and availabl
 - a manifest that contains only updates rather than the full shot table.
 - a tail frame being used as the only character or scene reference;
 - narration and character dialogue baked into one uncontrollable video soundtrack.
+- a reference-video node being mislabeled as native continuation;
+- a continued shot relying on the predecessor video instead of reattaching locked character and scene references;
+- unchecked continuation chains that accumulate face, costume, prop, or voice drift.
 
 Do not mutate media during an audit unless the user asks for changes.
 
@@ -48,7 +51,7 @@ Create a few short pilots, commonly 4–8 seconds, that stress different risks: 
 
 ## 5. Build the canonical atomic-shot manifest
 
-Split the script so each independently generated shot has one primary action, one primary camera setup, and at most one character speaker. Preserve exact dialogue unless the user approves editorial changes.
+Split the script so each atomic shot has one primary action, one primary camera setup, and at most one character speaker. Preserve exact dialogue unless the user approves editorial changes.
 
 Calculate duration from natural speech, action, and breathing room. A practical check is:
 
@@ -66,7 +69,9 @@ Start at the first unproduced shot. Select the largest continuous set that:
 - respects the configured batch-size limit;
 - does not skip an earlier dependency.
 
-For every shot, produce separate `AUDIO_READY` and `VIDEO_READY` decisions. Missing visual props block video, not necessarily audio. A missing speaker, voice master, approved line, or viable duration blocks audio.
+For every shot, produce separate `AUDIO_READY` and `VIDEO_READY` decisions. Also record `GENERATION_MODE = INDEPENDENT` or `NATIVE_CONTINUATION`. Missing visual props block video, not necessarily audio. A missing speaker, voice master, approved line, or viable duration blocks audio.
+
+For proposed continuation shots, audit the actual component and apply [video-continuation.md](video-continuation.md). A video input does not by itself prove continuation support. If the next shot is not eligible or the component cannot accept the required locked references, use `INDEPENDENT`.
 
 ## 7. Generate audio first
 
@@ -74,7 +79,7 @@ Generate narration and character dialogue separately. Use one node per narration
 
 After generation, verify output existence and duration. Human review must confirm voice identity, exact text, pronunciation, emotion, and timing before the audio is locked.
 
-## 8. Resolve visual dependencies
+## 8. Resolve visual dependencies and choose generation mode
 
 Before video generation:
 
@@ -82,14 +87,17 @@ Before video generation:
 - upload real final stable frames for hard-continuity shots when automatic extraction is unavailable;
 - keep continuity frames scoped to the next dependent shot and use them only for composition, camera, pose, and spatial layout;
 - require every new shot to reconnect its locked character, scene, and necessary prop references even when a tail frame is present.
+- for native continuation, lock the approved predecessor video and scope it to motion, composition, pacing, camera, pose, and spatial continuity only;
+- reject continuation for a scene/time/costume/age change, major camera reset, identity recovery, or a predecessor that already contains drift;
+- record the continuation round, live provider limit, and whether the output is an appended segment or a full extended video.
 
 ## 9. Generate video in dependency order
 
-Generate every video shot independently. Reconnect the locked character image and locked scene image on every shot, plus only the props that shot needs. A tail frame may guide starting composition, camera placement, pose, and spatial layout, but it must not become the source of character identity, costume, scene identity, or prop identity.
+For `INDEPENDENT` shots, generate a fresh short clip. For `NATIVE_CONTINUATION` shots, extend only the last human-approved predecessor. In both modes, reconnect the locked character image and locked scene image, plus only the props that shot needs. A predecessor video or tail frame may guide motion, composition, camera placement, pose, pacing, and spatial layout, but it must not become the source of character identity, costume, scene identity, prop identity, or voice identity.
 
 Dialogue shots may use the locked dry dialogue for lip-sync conditioning if the model supports it. Narration stays on a separate audio asset and should not make visible characters speak.
 
-Generate soft-continuity shots together only when they have no hard dependency on an unfinished predecessor. Stop before a hard-continuity shot whose real tail frame is absent.
+Generate soft-continuity shots together only when they have no hard dependency on an unfinished predecessor. Generate one continuation round at a time and stop for human review before chaining it. If native continuation is unavailable, fall back to an independent shot; require a real tail frame only when hard composition continuity cannot be achieved otherwise.
 
 ## 10. Review and lock
 
@@ -99,6 +107,8 @@ Review adjacent shots in sequence, not only in isolation. Check:
 - prop geometry, placement, color, and state;
 - scene layout, light direction, palette, and weather;
 - dialogue accuracy, voice identity, volume, and lip sync;
+- whether continuation has carried forward visual or audio drift;
+- whether a full extended output would duplicate its source clip during editing;
 - closed mouths for non-speakers and narration shots;
 - cuts, eyelines, action continuity, and accidental extra people or text.
 

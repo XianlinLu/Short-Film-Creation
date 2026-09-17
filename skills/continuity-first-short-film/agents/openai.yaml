@@ -1,4 +1,4 @@
 interface:
   display_name: "Continuity-First Short Film"
-  short_description: "Build consistent short films from ideas, scripts, or clips"
-  default_prompt: "Use $continuity-first-short-film to continue from my idea, script, reference assets, or existing clips with independent shots and final audio replacement."
+  short_description: "Build consistent short films with controlled continuation"
+  default_prompt: "Use $continuity-first-short-film to plan independent shots and controlled native video continuation while preserving locked character references, approved character voices, and final audio replacement."

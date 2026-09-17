@@ -14,6 +14,7 @@ SCENE_<LOCATION>_V1_MASTER
 PROP_<OBJECT>_V1_MASTER_LOCKED
 EP01_SC02_SH014_VOICE_V1
 EP01_SC02_SH014_VIDEO_V1
+EP01_SC02_SH014_CONTINUATION_V1
 EP01_SC02_SH013_TAILFRAME_V1_LOCKED
 ```
 
@@ -56,6 +57,13 @@ Every canonical version must contain the complete shot table, not only changes. 
 | `MOUTH_RULE` | Speaker only, all closed, or not applicable |
 | `CONTINUITY` | `HARD_CONTINUITY` or `SOFT_CONTINUITY` |
 | `PREDECESSOR` | Required prior shot |
+| `GENERATION_MODE` | `INDEPENDENT` or `NATIVE_CONTINUATION` |
+| `CONTINUATION_ELIGIBLE` | Gate result with a reason, never inferred from scene order alone |
+| `SOURCE_VIDEO` | Approved predecessor used by native continuation |
+| `SOURCE_VIDEO_SCOPE` | Motion, composition, pacing, camera, pose, and spatial continuity only |
+| `CONTINUATION_ROUND` | Current extension round in the chain |
+| `MAX_CONTINUATION_ROUNDS` | Limit read from the live provider or node schema |
+| `EXTENSION_OUTPUT_MODE` | `APPENDED_SEGMENT` or `FULL_EXTENDED_VIDEO` |
 | `TAILFRAME_REQUIRED` | Boolean and exact composition-frame asset ID |
 | `TAILFRAME_SCOPE` | Composition, camera, pose, and layout only |
 | `IDENTITY_REFS_REATTACHED` | Character and scene references explicitly connected on this shot |
@@ -77,6 +85,11 @@ AUDIO_READY
 AUDIO_BLOCKED
 VIDEO_READY
 VIDEO_BLOCKED
+CONTINUATION_READY
+CONTINUATION_BLOCKED
+NATIVE_CONTINUATION_UNAVAILABLE
+NATIVE_CONTINUATION_UNSAFE
+FALLBACK_TO_INDEPENDENT_SHOT
 GENERATED / MANUAL_AUDIO_QA_PENDING
 GENERATED / MANUAL_QA_PENDING
 APPROVED_PICTURE
@@ -99,13 +112,14 @@ The report should include:
 - per-shot audio and video readiness;
 - separate narration and character-dialogue readiness;
 - missing assets and real-tail-frame dependencies;
+- generation mode, native-continuation capability, approved source video, continuation round, and output mode;
 - actual generated node names and outputs;
 - the next required human decision;
 - a clear stopping condition.
 
 An absent formal audio output is `TO_GENERATE`, not inherently a blocker. A missing visual asset may block video while leaving audio ready.
 
-Every video row must name its character reference and scene reference even when a tail frame is attached. A tail frame with no reattached identity references is a preflight failure.
+Every video row must name its character reference and scene reference even when a predecessor video or tail frame is attached. A continuation source or tail frame with no reattached identity references is a preflight failure. A source video with no true extension operation must be classified as `VIDEO_REFERENCE`, not `NATIVE_CONTINUATION`.
 
 ## Approval semantics
 

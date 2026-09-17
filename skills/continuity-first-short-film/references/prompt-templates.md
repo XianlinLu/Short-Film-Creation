@@ -9,7 +9,7 @@ Read the canonical manifest and locked asset registry.
 
 Start at <FIRST_UNPRODUCED_SHOT>. Select up to <BATCH_SIZE> consecutive shots without crossing a scene boundary or skipping a dependency.
 
-Create <BATCH_PRECHECK_NODE>. For each shot record exact dialogue, speaker, voice master, on-screen characters, scene, props, action, camera, mouth rule, continuity type, tail-frame dependency, AUDIO_READY/AUDIO_BLOCKED, VIDEO_READY/VIDEO_BLOCKED, and the exact blocker.
+Create <BATCH_PRECHECK_NODE>. For each shot record exact dialogue, speaker, voice master, on-screen characters, scene, props, action, camera, mouth rule, continuity type, proposed generation mode, continuation eligibility, source-video or tail-frame dependency, AUDIO_READY/AUDIO_BLOCKED, VIDEO_READY/VIDEO_BLOCKED, and the exact blocker.
 
 Missing visual assets block video but do not block valid audio. Do not generate media in this run. Stop after writing and verifying the preflight.
 ```
@@ -24,7 +24,7 @@ Create separate narration and character-dialogue nodes. Use <SHOT_ID>_NARRATION_
 Silent shots remain NO_DIALOGUE and receive no fake empty audio. Record output existence and duration, then mark each result GENERATED / MANUAL_AUDIO_QA_PENDING. Do not generate video or approve audio. Stop for human listening.
 ```
 
-## 3. Lock approved audio and generate video
+## 3. Lock approved audio and generate independent video
 
 ```text
 The user has approved the batch's formal audio. Mark those nodes APPROVED / LOCKED / DO_NOT_REGENERATE.
@@ -36,7 +36,31 @@ Only the character speaker may move their mouth; narration stays separate and ke
 Stop before any hard-continuity shot whose real predecessor frame is absent. Mark outputs GENERATED / MANUAL_QA_PENDING and stop for human review.
 ```
 
-## 4. Lock a human-approved batch
+## 4. Audit native continuation capability
+
+```text
+Do not generate media in this run. Inspect the live video model and node schema for <MODEL_OR_NODE>.
+
+Determine whether it exposes true native timeline extension/continuation, ordinary video-reference generation, or no continuation. A video input port alone is not proof of native continuation. Record supported source-video inputs, required image/audio inputs, duration limit, maximum continuation rounds, whether locked character and scene images can be reattached, whether approved audio can condition lip sync, native-audio behavior, and whether output is APPENDED_SEGMENT or FULL_EXTENDED_VIDEO.
+
+Create <CONTINUATION_CAPABILITY_REPORT>. Conclude NATIVE_CONTINUATION_AVAILABLE, VIDEO_REFERENCE_ONLY, or NO_VIDEO_CONTINUATION. Do not create or modify video, audio, image, or locked assets. Stop after verifying the report.
+```
+
+## 5. Generate one controlled continuation
+
+```text
+Generate only <NEXT_SHOT_ID>. Do not create later shots in this run.
+
+First verify that <SOURCE_VIDEO_ID> has a real human-approved locked video output and that the next shot remains in the same scene, time, costume state, character set, and direct action/camera continuity. Verify that the live node exposes true native continuation and that the continuation round is within its current limit. If any check fails, create a preflight record with CONTINUATION_BLOCKED or FALLBACK_TO_INDEPENDENT_SHOT and stop without generating media.
+
+If all checks pass, create <NEXT_SHOT_ID>_CONTINUATION_V1. Connect <SOURCE_VIDEO_ID> only as motion, composition, pacing, camera, pose, and spatial-continuity input. Reconnect the locked image for every on-screen character, the locked scene master, and only the required locked prop/costume references. Never use the source video as character, scene, prop, or voice identity.
+
+For character dialogue, connect the exact approved dry dialogue <DIALOGUE_AUDIO_ID> only if the continuation node supports audio lip-sync conditioning. For narration, do not feed narration into visible mouths; keep <NARRATION_AUDIO_ID> separate. Do not invent or regenerate dialogue. Preserve one primary action and one primary camera movement.
+
+Record CONTINUATION_ROUND, MAX_CONTINUATION_ROUNDS, and EXTENSION_OUTPUT_MODE. Treat all returned native audio as TEMP_PREVIEW_AUDIO / NOT_FOR_FINAL_MIX and record MUTE_NATIVE_VIDEO_AUDIO_AND_REPLACE_WITH_APPROVED_TRACKS. Mark the result GENERATED / MANUAL_QA_PENDING and stop for human review. Do not automatically chain another continuation.
+```
+
+## 6. Lock a human-approved batch
 
 ```text
 The user has reviewed <SHOT_RANGE> in sequence and approves identity, props, scene, action, dialogue, voice, mouth behavior, and continuity.
@@ -46,7 +70,7 @@ Mark dialogue shots APPROVED_PICTURE_AND_LIPSYNC / LOCKED / DO_NOT_REGENERATE an
 Update the canonical manifest, registry, and batch QA record. Do not create the next batch in this run.
 ```
 
-## 5. Register a real tail frame
+## 7. Register a real tail frame
 
 ```text
 Verify that <TAILFRAME_ID> is a real image extracted from <SOURCE_VIDEO_ID>, without player UI, black frames, transition blur, subtitles, or watermarks.
@@ -78,4 +102,26 @@ Register it APPROVED_COMPOSITION_FRAME / LOCKED / FOR_<NEXT_SHOT>_ONLY / DO_NOT_
 用户已确认本批正式音频。锁定音频后重新检查视频门禁，把每个镜头作为独立短视频生成。每一镜都必须重新连接实际出场角色图和锁定场景图，再连接必要道具与角色对白音频。上一镜尾帧只能控制构图、机位、姿态和空间关系，不能替代角色图、场景图或道具图。
 
 只有说话角色动嘴；旁白保持独立，旁白画面人物闭口。禁止字幕、文字、水印、额外人物和额外对白。视频原生音轨只作预览，最终必须静音并替换为已确认的旁白和对白轨。缺少真实尾帧时停止，不得伪造。生成后标记 GENERATED / MANUAL_QA_PENDING，等待人工验收。
+```
+
+## 中文简版：续写能力核查
+
+```text
+本轮不生成媒体。读取 <模型或节点> 的实时参数与端口，判断它提供的是：真正的原生时间线续写、普通视频参考生成，还是完全不支持续写。仅有 video 输入端口不能证明支持原生续写。
+
+创建 <续写能力报告>，记录：源视频要求、是否能同时重新连接角色图和场景图、是否能输入锁定对白做口型、单次时长、最大续写轮数、原生音频行为，以及输出是“仅新增片段”还是“包含源视频的完整延长视频”。结论只能是 NATIVE_CONTINUATION_AVAILABLE、VIDEO_REFERENCE_ONLY 或 NO_VIDEO_CONTINUATION。写完并验证报告后停止，不修改锁定资产。
+```
+
+## 中文简版：单镜头受控续写
+
+```text
+本轮只生成 <下一镜头 ID>，不得继续创建后续镜头。
+
+先验证 <源视频 ID> 有真实、已人工确认并锁定的视频输出；下一镜必须保持同一场景、时间、服装、角色集合，并直接延续动作或机位。实时节点必须提供真正的原生续写，且当前续写轮次未超过限制。任一条件不满足时，只记录 CONTINUATION_BLOCKED 或 FALLBACK_TO_INDEPENDENT_SHOT，然后停止，不生成媒体。
+
+通过后创建 <下一镜头 ID>_CONTINUATION_V1。把 <源视频 ID> 仅作为动作、构图、节奏、机位、姿态和空间连续参考；同时重新连接本镜实际出场角色的锁定角色图、锁定场景图，以及必要的锁定道具和服装状态图。源视频不能替代任何身份资产或声音母带。
+
+角色说话镜头只有在续写节点支持音频驱动口型时，才连接已经确认的干声 <对白音频 ID>；旁白 <旁白音频 ID> 保持独立，不驱动画面人物开口。不得重新生成或改写对白。
+
+记录 CONTINUATION_ROUND、MAX_CONTINUATION_ROUNDS 和 EXTENSION_OUTPUT_MODE。生成视频的原生音轨一律标记 TEMP_PREVIEW_AUDIO / NOT_FOR_FINAL_MIX，并记录最终静音后替换为锁定对白与旁白。结果标记 GENERATED / MANUAL_QA_PENDING，等待人工验收；不得自动串联下一次续写。
 ```

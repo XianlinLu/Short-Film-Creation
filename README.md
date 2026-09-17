@@ -4,7 +4,7 @@
 
 This repository contains a reusable skill for planning and producing multi-shot AI short films without losing character identity, voice identity, props, locations, or shot continuity.
 
-It grew out of a practical node-canvas production workflow in which every short shot is generated independently, every shot reconnects its character and scene references, predecessor frames control composition only, narration and dialogue are generated separately, and the final edit replaces all native video audio.
+It grew out of a practical node-canvas production workflow in which independent short shots are the default, controlled native continuation is used only for eligible same-scene action, every shot reconnects its character and scene references, narration and dialogue are generated separately, and the final edit replaces all native video audio.
 
 ## Why this exists
 
@@ -14,7 +14,7 @@ Long-form generative video often fails for structural reasons rather than prompt
 - one combined cast sheet makes the video model confuse characters;
 - seeds are mistaken for identity controls;
 - video-native audio changes between shots or adds unwanted ambience;
-- hard-continuity shots are generated without a real predecessor frame;
+- hard-continuity shots are generated without an approved native-continuation source or real predecessor frame;
 - a partial manifest replaces the complete production plan;
 - successful shots are regenerated when only one node failed.
 
@@ -27,15 +27,29 @@ Script
   -> locked characters, voices, locations, and props
   -> canonical atomic-shot manifest
   -> separate narration and character-dialogue generation
-  -> independently generated short shots
-  -> character image + scene image reattached on every shot
-  -> predecessor tail frame used only for composition continuity
+  -> independent short shot OR eligible controlled continuation
+  -> character image + scene image reattached in either mode
+  -> predecessor video controls motion/composition only
+  -> tail frame used only as a hard-continuity fallback
   -> human visual and continuity approval
   -> mute native video audio
   -> replace with approved narration, dialogue, ambience, SFX, and music
 ```
 
 The key idea is simple: models generate candidates; humans approve assets; downstream shots consume only approved assets.
+
+## Controlled continuation
+
+Continuation is an optimization for direct same-scene action, not an identity system. The skill first checks the live node to distinguish true timeline extension from ordinary video-reference generation.
+
+| Situation | Mode |
+| --- | --- |
+| Same scene, time, costume, cast, and directly continuing action | Native continuation may be used after preflight |
+| New scene, time, costume, age, speaking setup, or major camera reset | Independent shot |
+| Predecessor already contains identity or anatomy drift | Independent shot from locked assets |
+| True continuation is unavailable | Independent shot; use matched editing or a real tail frame if hard continuity requires it |
+
+Even during continuation, the next shot reconnects locked character, scene, prop, and approved dialogue assets. The predecessor video controls motion and composition only. Each result is reviewed before it can become the next continuation source.
 
 ## Repository structure
 
@@ -45,6 +59,7 @@ skills/continuity-first-short-film/
 ├── agents/openai.yaml
 └── references/
     ├── workflow.md
+    ├── video-continuation.md
     ├── entry-scenarios.md
     ├── production-schema.md
     ├── prompt-templates.md
@@ -59,7 +74,9 @@ skills/continuity-first-short-film/
 - maintaining a complete canonical shot manifest;
 - separating audio readiness from video readiness;
 - producing in small scene-local batches;
-- generating every shot independently with character and scene references reattached;
+- generating independently by default and using native continuation only after an eligibility gate;
+- reattaching character, scene, and required prop references in either generation mode;
+- preserving character voice with locked voice masters or approved shot dialogue instead of predecessor-video audio;
 - using real tail frames only for composition, camera, pose, and spatial continuity;
 - keeping narration and character dialogue as separate approved tracks;
 - generating copy-ready English and Chinese canvas-agent prompts;
@@ -84,34 +101,35 @@ Restart or refresh Codex if needed so it can discover the new skill.
 ### You already have a script
 
 ```text
-Use $continuity-first-short-film with my finished script. Preserve the story and dialogue, split it into short independent shots, create an asset-gap list and canonical manifest, generate narration and character dialogue separately, and make every video shot reconnect its character and scene references. Use tail frames only for composition continuity and plan to replace all native video audio in the final edit.
+Use $continuity-first-short-film with my finished script. Preserve the story and dialogue, split it into atomic shots, and generate narration and character dialogue separately. Use independent generation by default and native continuation only for eligible same-scene direct action. In either mode, reconnect locked character, scene, and required prop references; preserve approved character voices; and replace native video audio in the final edit.
 ```
 
 ### You already have generated videos
 
 ```text
-Use $continuity-first-short-film to repair my existing generated clips. Keep every shot that already passes, identify only the shots with character, scene, composition, lip-sync, or audio drift, and rebuild those shots independently with character and scene references reattached. Use predecessor frames only for composition, generate narration and dialogue separately, and produce a final audio-replacement plan.
+Use $continuity-first-short-film to continue or repair my existing clips. Keep every shot that passes. Audit whether true native continuation is available and use it only for eligible same-scene direct action; otherwise create the next shot independently. Reattach locked character and scene references in either mode, preserve approved character voices, and produce a final audio-replacement plan.
 ```
 
 ### You have no script or reference images
 
 ```text
-Use $continuity-first-short-film to develop my idea into a complete short film. I do not have a script or reference images yet. Help me define the concept, write and approve the screenplay, design and approve reusable character and scene references, then split it into independent short shots with separate narration and dialogue and a final audio-replacement workflow.
+Use $continuity-first-short-film to develop my idea into a complete short film. I do not have a script or reference images yet. Help me define the concept, write and approve the screenplay, design and approve reusable character, scene, and voice references, then split it into atomic shots. Generate independently by default, reserve controlled continuation for eligible same-scene action, keep narration and dialogue separate, and replace native video audio in the final edit.
 ```
 
 The skill can also be selected automatically when a request clearly concerns multi-shot AI film continuity or gated production.
 
 ## Production principles
 
-1. **Every short shot is generated independently.**
-2. **Every shot reconnects its locked character image and scene image.**
-3. **A predecessor tail frame controls composition only, never identity.**
-4. **Narration and character dialogue are generated as separate assets.**
-5. **All native video audio is muted and replaced in the final edit.**
-6. **Identity comes from locked assets, not names, seeds, or tail frames.**
-7. **One shot has one primary action, camera setup, and character speaker.**
-8. **Human review is required before an output becomes locked.**
-9. **Only failed shots are regenerated.**
+1. **Independent short shots are the default.**
+2. **Native continuation is used only for eligible same-scene direct action.**
+3. **Every independent or continued shot reconnects its locked character image and scene image.**
+4. **A predecessor video controls motion and composition only, never identity or voice.**
+5. **A tail frame is a hard-continuity fallback, not an identity reference.**
+6. **Narration and character dialogue are generated as separate approved assets.**
+7. **All native video audio is muted and replaced in the final edit.**
+8. **Identity comes from locked assets, not names, seeds, tail frames, or predecessor soundtracks.**
+9. **Every continuation is human-reviewed before another continuation may start.**
+10. **Only failed shots are regenerated.**
 
 ## Scope
 

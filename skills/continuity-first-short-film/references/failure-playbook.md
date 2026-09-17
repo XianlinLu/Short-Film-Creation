@@ -20,6 +20,31 @@ Likely causes: a combined cast sheet is the only reference, too many irrelevant 
 
 Response: regenerate only failed shots as independent short clips. Reattach the locked character and scene images on every replacement shot and use only the angles and characters needed by that shot. Keep costume and key prop states explicit. Seeds remain optional reproducibility parameters. A predecessor tail frame may recover composition but not identity.
 
+If the failed shot was produced by continuation, restart from the last approved source video and reattach the complete locked reference set. Do not continue from a drifted result. If identity drift repeats, mark `FALLBACK_TO_INDEPENDENT_SHOT`.
+
+## Native continuation is unavailable or only video reference exists
+
+A video-input port is not proof of native extension. Inspect the live operation and classify it honestly.
+
+1. If only `VIDEO_REFERENCE` exists, do not claim that the predecessor timeline is being extended.
+2. Generate the next shot independently with locked character, scene, prop, and audio references.
+3. Match lens, camera height, eyeline, action direction, palette, and edit timing for soft continuity.
+4. Use a real tail frame only when hard composition continuity remains essential.
+
+## Continuation accumulates drift
+
+Likely causes: chaining without human review, using the source video as identity control, extending beyond the live round limit, or continuing from an already flawed clip.
+
+Response:
+
+1. Stop the chain at the first failed continuation.
+2. Keep earlier approved shots locked.
+3. Retry only the failed continuation from the last approved source.
+4. Reattach locked character, scene, costume, prop, and approved dialogue inputs.
+5. If drift repeats, create a fresh independent anchor shot and continue production from it.
+
+Never use another continuation to repair a character identity that has already drifted.
+
 ## Video output audio triggers a copyright or sensitive-audio policy error
 
 Treat this as an output-level video-audio failure, not proof that the locked dry voice is invalid.
@@ -39,7 +64,9 @@ Approve picture and lip sync separately from the soundtrack. Mark native audio `
 
 ## No automatic frame extraction
 
-For composition continuity, ask the user to export the predecessor clip's last clear stable frame. It should contain no player UI, black frame, fade, subtitles, or watermark. Register it for the next dependent shot only. The replacement shot must still reconnect the locked character image, scene image, and necessary prop images; the tail frame controls composition only.
+First check whether true native continuation can safely carry the approved predecessor into the next eligible same-scene action while accepting all locked references. If it can, use controlled continuation and do not require a manual tail frame.
+
+Otherwise, for hard composition continuity, ask the user to export the predecessor clip's last clear stable frame. It should contain no player UI, black frame, fade, subtitles, or watermark. Register it for the next dependent shot only. The replacement shot must still reconnect the locked character image, scene image, and necessary prop images; the tail frame controls composition only.
 
 If the shot does not truly require pixel-level action continuation, propose downgrading to soft continuity, but require the user to approve that creative tradeoff.
 
