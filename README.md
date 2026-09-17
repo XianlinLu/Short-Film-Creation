@@ -4,7 +4,7 @@
 
 This repository contains a reusable Codex skill for planning and producing multi-shot AI short films without losing character identity, voice identity, props, locations, or shot continuity.
 
-It grew out of a practical node-canvas production workflow in which a screenplay is converted into locked reusable assets, an atomic-shot manifest, small production batches, human approval gates, and an external final audio mix.
+It grew out of a practical node-canvas production workflow in which every short shot is generated independently, every shot reconnects its character and scene references, predecessor frames control composition only, narration and dialogue are generated separately, and the final edit replaces all native video audio.
 
 ## Why this exists
 
@@ -26,12 +26,13 @@ The skill turns these failure modes into explicit production gates.
 Script
   -> locked characters, voices, locations, and props
   -> canonical atomic-shot manifest
-  -> scene-local batch preflight
-  -> dry dialogue generation and human approval
-  -> prop and tail-frame resolution
-  -> dependency-ordered video generation
+  -> separate narration and character-dialogue generation
+  -> independently generated short shots
+  -> character image + scene image reattached on every shot
+  -> predecessor tail frame used only for composition continuity
   -> human visual and continuity approval
-  -> external final dialogue, ambience, SFX, and music mix
+  -> mute native video audio
+  -> replace with approved narration, dialogue, ambience, SFX, and music
 ```
 
 The key idea is simple: models generate candidates; humans approve assets; downstream shots consume only approved assets.
@@ -44,6 +45,7 @@ skills/continuity-first-short-film/
 ├── agents/openai.yaml
 └── references/
     ├── workflow.md
+    ├── entry-scenarios.md
     ├── production-schema.md
     ├── prompt-templates.md
     └── failure-playbook.md
@@ -57,7 +59,9 @@ skills/continuity-first-short-film/
 - maintaining a complete canonical shot manifest;
 - separating audio readiness from video readiness;
 - producing in small scene-local batches;
-- enforcing real tail-frame continuity;
+- generating every shot independently with character and scene references reattached;
+- using real tail frames only for composition, camera, pose, and spatial continuity;
+- keeping narration and character dialogue as separate approved tracks;
 - generating copy-ready English and Chinese canvas-agent prompts;
 - recovering from incomplete manifests, failed nodes, and output-audio errors;
 - preserving clean dialogue for a controlled final mix.
@@ -75,34 +79,39 @@ cp -R skills/continuity-first-short-film ~/.codex/skills/
 
 Restart or refresh Codex if needed so it can discover the new skill.
 
-## Usage
+## Usage by starting point
 
-Invoke the skill explicitly:
+### You already have a script
 
 ```text
-Use $continuity-first-short-film to audit my AI-video canvas and identify the next safe production batch.
+Use $continuity-first-short-film with my finished script. Preserve the story and dialogue, split it into short independent shots, create an asset-gap list and canonical manifest, generate narration and character dialogue separately, and make every video shot reconnect its character and scene references. Use tail frames only for composition continuity and plan to replace all native video audio in the final edit.
 ```
 
-```text
-Use $continuity-first-short-film to convert this screenplay into a continuity-safe atomic-shot manifest.
-```
+### You already have generated videos
 
 ```text
-Use $continuity-first-short-film to diagnose why character voices and appearances drift between shots.
+Use $continuity-first-short-film to repair my existing generated clips. Keep every shot that already passes, identify only the shots with character, scene, composition, lip-sync, or audio drift, and rebuild those shots independently with character and scene references reattached. Use predecessor frames only for composition, generate narration and dialogue separately, and produce a final audio-replacement plan.
+```
+
+### You have no script or reference images
+
+```text
+Use $continuity-first-short-film to develop my idea into a complete short film. I do not have a script or reference images yet. Help me define the concept, write and approve the screenplay, design and approve reusable character and scene references, then split it into independent short shots with separate narration and dialogue and a final audio-replacement workflow.
 ```
 
 The skill can also be selected automatically when a request clearly concerns multi-shot AI film continuity or gated production.
 
 ## Production principles
 
-1. **Identity comes from locked assets, not names or seeds.**
-2. **One shot has one primary action, camera setup, and speaker.**
-3. **Dry dialogue is generated and approved before video.**
-4. **Audio and video have separate readiness gates.**
-5. **Hard continuity requires a real stable frame.**
-6. **Video-native audio is provisional unless explicitly approved.**
-7. **Human review is required before an output becomes locked.**
-8. **Only failed shots are regenerated.**
+1. **Every short shot is generated independently.**
+2. **Every shot reconnects its locked character image and scene image.**
+3. **A predecessor tail frame controls composition only, never identity.**
+4. **Narration and character dialogue are generated as separate assets.**
+5. **All native video audio is muted and replaced in the final edit.**
+6. **Identity comes from locked assets, not names, seeds, or tail frames.**
+7. **One shot has one primary action, camera setup, and character speaker.**
+8. **Human review is required before an output becomes locked.**
+9. **Only failed shots are regenerated.**
 
 ## Scope
 

@@ -18,7 +18,7 @@ Response:
 
 Likely causes: a combined cast sheet is the only reference, too many irrelevant references are connected, or seeds are being treated as identity controls.
 
-Response: use independent character masters and only the angles and characters needed by the current shot. Keep costume and key prop states explicit. Seeds remain optional reproducibility parameters.
+Response: regenerate only failed shots as independent short clips. Reattach the locked character and scene images on every replacement shot and use only the angles and characters needed by that shot. Keep costume and key prop states explicit. Seeds remain optional reproducibility parameters. A predecessor tail frame may recover composition but not identity.
 
 ## Video output audio triggers a copyright or sensitive-audio policy error
 
@@ -35,11 +35,11 @@ If a normal rerun succeeds, keep the successful original shot and mark any silen
 
 ## Native video contains unwanted ambience or effects
 
-Approve picture and lip sync separately from the soundtrack. Mark native audio `TEMP_PREVIEW_AUDIO / NOT_FOR_FINAL_MIX`; mute it in post and use the locked dry dialogue with controlled ambience and effects.
+Approve picture and lip sync separately from the soundtrack. Mark native audio `TEMP_PREVIEW_AUDIO / NOT_FOR_FINAL_MIX`; always mute it in post and replace it with separate approved narration and character-dialogue tracks, then add controlled ambience and effects.
 
 ## No automatic frame extraction
 
-For hard continuity, ask the user to export the predecessor clip's last clear stable frame. It should contain no player UI, black frame, fade, subtitles, or watermark. Register it for the next dependent shot only.
+For composition continuity, ask the user to export the predecessor clip's last clear stable frame. It should contain no player UI, black frame, fade, subtitles, or watermark. Register it for the next dependent shot only. The replacement shot must still reconnect the locked character image, scene image, and necessary prop images; the tail frame controls composition only.
 
 If the shot does not truly require pixel-level action continuation, propose downgrading to soft continuity, but require the user to approve that creative tradeoff.
 

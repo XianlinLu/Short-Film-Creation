@@ -45,7 +45,9 @@ Every canonical version must contain the complete shot table, not only changes. 
 | `SHOT_TYPE` | Dialogue, narration, or no dialogue |
 | `DIALOGUE` | Exact approved text |
 | `SPEAKER` | At most one speaker |
-| `VOICE_MASTER` | Locked voice source |
+| `DIALOGUE_VOICE_MASTER` | Locked character-dialogue source |
+| `NARRATION_TEXT` | Exact narration text, kept separate from dialogue |
+| `NARRATION_VOICE_MASTER` | Locked narrator source |
 | `CHARACTER_REFS` | Only actual on-screen characters |
 | `SCENE_REF` | Locked location master |
 | `PROP_REFS` | Required locked props |
@@ -54,10 +56,12 @@ Every canonical version must contain the complete shot table, not only changes. 
 | `MOUTH_RULE` | Speaker only, all closed, or not applicable |
 | `CONTINUITY` | `HARD_CONTINUITY` or `SOFT_CONTINUITY` |
 | `PREDECESSOR` | Required prior shot |
-| `TAILFRAME_REQUIRED` | Boolean and exact asset ID |
+| `TAILFRAME_REQUIRED` | Boolean and exact composition-frame asset ID |
+| `TAILFRAME_SCOPE` | Composition, camera, pose, and layout only |
+| `IDENTITY_REFS_REATTACHED` | Character and scene references explicitly connected on this shot |
 | `AUDIO_STATUS` | Readiness and approval state |
 | `VIDEO_STATUS` | Readiness and approval state |
-| `POST_AUDIO_ACTION` | Final sound handling |
+| `POST_AUDIO_ACTION` | Always mute native audio and replace it with approved narration/dialogue |
 | `BLOCKER` | Exact unresolved dependency |
 
 After repairs, compare old and new manifests by shot ID. Reconcile changes in shot count, total duration, dialogue, speaker, scene, asset references, and continuity. Unexplained deltas remain blocked.
@@ -78,6 +82,7 @@ GENERATED / MANUAL_QA_PENDING
 APPROVED_PICTURE
 APPROVED_PICTURE_AND_LIPSYNC
 TEMP_PREVIEW_AUDIO / NOT_FOR_FINAL_MIX
+MUTE_NATIVE_VIDEO_AUDIO_AND_REPLACE_WITH_APPROVED_TRACKS
 PENDING_EXTERNAL_FINAL_AUDIO_MIX
 UNUSED_RECOVERY_VERSION / DO_NOT_CONNECT / DO_NOT_EXPORT
 BLOCKED_BY_PROP
@@ -92,12 +97,15 @@ The report should include:
 
 - exact shot range and scene boundary;
 - per-shot audio and video readiness;
+- separate narration and character-dialogue readiness;
 - missing assets and real-tail-frame dependencies;
 - actual generated node names and outputs;
 - the next required human decision;
 - a clear stopping condition.
 
 An absent formal audio output is `TO_GENERATE`, not inherently a blocker. A missing visual asset may block video while leaving audio ready.
+
+Every video row must name its character reference and scene reference even when a tail frame is attached. A tail frame with no reattached identity references is a preflight failure.
 
 ## Approval semantics
 

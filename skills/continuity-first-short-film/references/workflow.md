@@ -1,6 +1,6 @@
 # End-to-End Workflow
 
-Use this reference when starting, auditing, or resuming a multi-shot AI short film.
+Use this reference when starting, auditing, or resuming a multi-shot AI short film. Every path uses independently generated short shots. Each shot receives its locked character and scene references again; a predecessor frame controls composition only.
 
 ## 1. Audit the current project
 
@@ -13,6 +13,8 @@ Inventory the script, node graph, existing outputs, model settings, and availabl
 - fixed seeds used as identity controls;
 - shots generated in parallel despite hard continuity;
 - a manifest that contains only updates rather than the full shot table.
+- a tail frame being used as the only character or scene reference;
+- narration and character dialogue baked into one uncontrollable video soundtrack.
 
 Do not mutate media during an audit unless the user asks for changes.
 
@@ -42,11 +44,11 @@ Names written in prompts are not voice references. A declared ID is useful only 
 
 ## 4. Make short pilots
 
-Create a few 4–8 second pilots that stress different risks: close-up identity, two-character dialogue, a location change, a prop close-up, and lip sync. Use only locked assets. Resolve systemic problems before producing the episode.
+Create a few short pilots, commonly 4–8 seconds, that stress different risks: close-up identity, two-character dialogue, a location change, a prop close-up, and lip sync. Generate each pilot independently and reattach its character and scene references. Resolve systemic problems before producing the episode.
 
 ## 5. Build the canonical atomic-shot manifest
 
-Split the script so each shot has one primary action, one primary camera setup, and at most one speaker. Preserve exact dialogue unless the user approves editorial changes.
+Split the script so each independently generated shot has one primary action, one primary camera setup, and at most one character speaker. Preserve exact dialogue unless the user approves editorial changes.
 
 Calculate duration from natural speech, action, and breathing room. A practical check is:
 
@@ -68,7 +70,7 @@ For every shot, produce separate `AUDIO_READY` and `VIDEO_READY` decisions. Miss
 
 ## 7. Generate audio first
 
-Use one node per speaking shot and connect the correct locked voice master. Generate clean speech with no music, ambience, sound effects, or reverb. Do not create fake empty audio for silent shots.
+Generate narration and character dialogue separately. Use one node per narration segment or character-speaking shot and connect the correct locked voice master. When narration and dialogue share the same picture, keep them as separate audio nodes or tracks. Generate clean speech with no music, ambience, sound effects, or reverb. Do not create fake empty audio for silent shots.
 
 After generation, verify output existence and duration. Human review must confirm voice identity, exact text, pronunciation, emotion, and timing before the audio is locked.
 
@@ -78,11 +80,14 @@ Before video generation:
 
 - lock required prop candidates and their useful angles;
 - upload real final stable frames for hard-continuity shots when automatic extraction is unavailable;
-- keep continuity frames scoped to the next dependent shot rather than treating them as general character or scene references.
+- keep continuity frames scoped to the next dependent shot and use them only for composition, camera, pose, and spatial layout;
+- require every new shot to reconnect its locked character, scene, and necessary prop references even when a tail frame is present.
 
 ## 9. Generate video in dependency order
 
-Connect only the references needed by each shot. Dialogue shots may use the locked dry voice for lip-sync conditioning if the model supports it. Narration shots should not make visible characters speak.
+Generate every video shot independently. Reconnect the locked character image and locked scene image on every shot, plus only the props that shot needs. A tail frame may guide starting composition, camera placement, pose, and spatial layout, but it must not become the source of character identity, costume, scene identity, or prop identity.
+
+Dialogue shots may use the locked dry dialogue for lip-sync conditioning if the model supports it. Narration stays on a separate audio asset and should not make visible characters speak.
 
 Generate soft-continuity shots together only when they have no hard dependency on an unfinished predecessor. Stop before a hard-continuity shot whose real tail frame is absent.
 
@@ -101,13 +106,14 @@ Rerun only failed shots. Lock approved picture/lip-sync separately from final au
 
 ## 11. Finish audio externally when needed
 
-If the canvas lacks audio replacement or AV muxing, mark shots `PENDING_EXTERNAL_FINAL_AUDIO_MIX`. In the editor:
+Every video model soundtrack is temporary. If the canvas lacks audio replacement or AV muxing, mark shots `PENDING_EXTERNAL_FINAL_AUDIO_MIX`. In the editor:
 
 1. mute or remove native video audio;
-2. place the locked dry dialogue;
-3. add controlled ambience;
-4. add deliberate sound effects;
-5. add music last;
-6. normalize loudness across the sequence.
+2. place the locked narration track;
+3. place the locked character-dialogue tracks;
+4. add controlled ambience;
+5. add deliberate sound effects;
+6. add music last;
+7. normalize loudness across the sequence.
 
-Do not use inconsistent model-generated ambience as the final sound bed merely because the dialogue sounded correct.
+Do not retain native video audio in the final delivery merely because the dialogue sounded correct. Replace it with the approved spoken tracks and controlled sound design.
