@@ -57,6 +57,7 @@ Even during continuation, the next shot reconnects locked character, scene, prop
 skills/continuity-first-short-film/
 ├── SKILL.md
 ├── agents/openai.yaml
+├── scripts/check_video_prompt.py
 └── references/
     ├── workflow.md
     ├── video-continuation.md
@@ -77,6 +78,7 @@ skills/continuity-first-short-film/
 - generating independently by default and using native continuation only after an eligibility gate;
 - reattaching character, scene, and required prop references in either generation mode;
 - preserving character voice with locked voice masters or approved shot dialogue instead of predecessor-video audio;
+- blocking video prompts that contain uncertain language or unresolved alternatives;
 - using real tail frames only for composition, camera, pose, and spatial continuity;
 - keeping narration and character dialogue as separate approved tracks;
 - generating copy-ready English and Chinese canvas-agent prompts;
@@ -129,7 +131,14 @@ The skill can also be selected automatically when a request clearly concerns mul
 7. **All native video audio is muted and replaced in the final edit.**
 8. **Identity comes from locked assets, not names, seeds, tail frames, or predecessor soundtracks.**
 9. **Every continuation is human-reviewed before another continuation may start.**
-10. **Only failed shots are regenerated.**
+10. **Every video prompt makes one exact choice; vague alternatives are blocked before generation.**
+11. **Only failed shots are regenerated.**
+
+To check a local prompt deterministically:
+
+```bash
+python3 skills/continuity-first-short-film/scripts/check_video_prompt.py prompt.txt
+```
 
 ## Scope
 

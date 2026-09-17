@@ -54,6 +54,8 @@ Every canonical version must contain the complete shot table, not only changes. 
 | `PROP_REFS` | Required locked props |
 | `ACTION` | One primary action |
 | `CAMERA` | One primary camera setup |
+| `VIDEO_PROMPT` | Final deterministic prompt sent to the video node |
+| `PROMPT_CERTAINTY_CHECK` | `PASS` only when no unresolved alternative or uncertainty remains |
 | `MOUTH_RULE` | Speaker only, all closed, or not applicable |
 | `CONTINUITY` | `HARD_CONTINUITY` or `SOFT_CONTINUITY` |
 | `PREDECESSOR` | Required prior shot |
@@ -85,6 +87,7 @@ AUDIO_READY
 AUDIO_BLOCKED
 VIDEO_READY
 VIDEO_BLOCKED
+VIDEO_BLOCKED_BY_AMBIGUOUS_PROMPT
 CONTINUATION_READY
 CONTINUATION_BLOCKED
 NATIVE_CONTINUATION_UNAVAILABLE
@@ -113,6 +116,7 @@ The report should include:
 - separate narration and character-dialogue readiness;
 - missing assets and real-tail-frame dependencies;
 - generation mode, native-continuation capability, approved source video, continuation round, and output mode;
+- the final video prompt and `PROMPT_CERTAINTY_CHECK` result;
 - actual generated node names and outputs;
 - the next required human decision;
 - a clear stopping condition.

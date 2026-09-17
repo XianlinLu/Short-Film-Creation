@@ -2,6 +2,23 @@
 
 Use this reference when production cannot safely advance.
 
+## Video prompt contains ambiguity
+
+Do not submit the node. Ambiguous language delegates a creative decision to the video model and makes continuity non-reproducible.
+
+1. Locate every uncertain term, alternative action, approximate timing, optional camera move, and unspecified asset state.
+2. Select one exact action, one exact camera path, one exact composition, one duration, and one state for each character and prop.
+3. Replace phrases such as `可能`, `或者`, `或许`, `也许`, `大概`, `似乎`, `尽量`, `适当`, `maybe`, `perhaps`, `possibly`, `either`, and `or` with direct instructions.
+4. Run `scripts/check_video_prompt.py` when the prompt is available as text locally.
+5. Mark `PROMPT_CERTAINTY_CHECK = PASS` only after the prompt contains no unresolved alternatives.
+
+Example:
+
+```text
+Reject: 她可能转身，或者看向窗外，镜头或许缓慢推进。
+Use: 她向右转身，看向窗外。镜头沿直线缓慢推进，持续 5 秒。
+```
+
 ## Voice changes between shots
 
 Likely cause: each TTS node generated a fresh voice from text instructions.

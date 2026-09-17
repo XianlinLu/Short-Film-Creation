@@ -57,6 +57,7 @@
 skills/continuity-first-short-film/
 ├── SKILL.md
 ├── agents/openai.yaml
+├── scripts/check_video_prompt.py
 └── references/
     ├── workflow.md
     ├── video-continuation.md
@@ -77,6 +78,7 @@ skills/continuity-first-short-film/
 - 默认独立生成，只有通过资格门禁的镜头才使用原生续写；
 - 无论独立生成还是续写，都重新连接角色图、场景图和必要道具；
 - 使用锁定声音母带或已确认的镜头对白保持声线，而不是依赖上一段视频音轨；
+- 在生成前阻止包含模糊措辞或未决备选方案的视频提示词；
 - 真实尾帧只控制构图、机位、姿态和空间连续；
 - 旁白与角色对白分开生成并锁定；
 - 生成可直接发送给画布 Agent 的中英文提示词；
@@ -129,7 +131,14 @@ cp -R skills/continuity-first-short-film ~/.codex/skills/
 7. **最终剪辑必须静音并替换全部视频原生音轨。**
 8. **角色身份来自锁定资产，而不是名字、seed、尾帧或上一段视频音轨。**
 9. **每一次续写都要人工确认后才能继续下一次。**
-10. **只重跑失败镜头，不重跑整批成功镜头。**
+10. **每条视频提示词只能有一个确定方案；模糊表达必须在生成前被阻止。**
+11. **只重跑失败镜头，不重跑整批成功镜头。**
+
+本地提示词可以使用确定性检查脚本：
+
+```bash
+python3 skills/continuity-first-short-film/scripts/check_video_prompt.py prompt.txt
+```
 
 ## 适用范围
 

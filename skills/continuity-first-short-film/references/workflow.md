@@ -18,6 +18,7 @@ Inventory the script, node graph, existing outputs, model settings, and availabl
 - a reference-video node being mislabeled as native continuation;
 - a continued shot relying on the predecessor video instead of reattaching locked character and scene references;
 - unchecked continuation chains that accumulate face, costume, prop, or voice drift.
+- video prompts that leave actions, camera moves, composition, timing, or asset states as uncertain alternatives.
 
 Do not mutate media during an audit unless the user asks for changes.
 
@@ -71,6 +72,8 @@ Start at the first unproduced shot. Select the largest continuous set that:
 
 For every shot, produce separate `AUDIO_READY` and `VIDEO_READY` decisions. Also record `GENERATION_MODE = INDEPENDENT` or `NATIVE_CONTINUATION`. Missing visual props block video, not necessarily audio. A missing speaker, voice master, approved line, or viable duration blocks audio.
 
+Before marking video ready, convert the manifest row into one deterministic video prompt. Specify one action, one camera setup, one composition, exact timing, exact character and prop states, and explicit mouth behavior. Do not include uncertainty or alternative choices such as `可能`, `或者`, `或许`, `也许`, `大概`, `似乎`, `尽量`, `适当`, `maybe`, `perhaps`, `possibly`, `either`, or `or`. If a creative choice is unresolved, block the shot instead of asking the video model to decide.
+
 For proposed continuation shots, audit the actual component and apply [video-continuation.md](video-continuation.md). A video input does not by itself prove continuation support. If the next shot is not eligible or the component cannot accept the required locked references, use `INDEPENDENT`.
 
 ## 7. Generate audio first
@@ -93,7 +96,7 @@ Before video generation:
 
 ## 9. Generate video in dependency order
 
-For `INDEPENDENT` shots, generate a fresh short clip. For `NATIVE_CONTINUATION` shots, extend only the last human-approved predecessor. In both modes, reconnect the locked character image and locked scene image, plus only the props that shot needs. A predecessor video or tail frame may guide motion, composition, camera placement, pose, pacing, and spatial layout, but it must not become the source of character identity, costume, scene identity, prop identity, or voice identity.
+For `INDEPENDENT` shots, generate a fresh short clip. For `NATIVE_CONTINUATION` shots, extend only the last human-approved predecessor. In both modes, reconnect the locked character image and locked scene image, plus only the props that shot needs. A predecessor video or tail frame may guide motion, composition, camera placement, pose, pacing, and spatial layout, but it must not become the source of character identity, costume, scene identity, prop identity, or voice identity. Submit only prompts whose `PROMPT_CERTAINTY_CHECK` is `PASS`.
 
 Dialogue shots may use the locked dry dialogue for lip-sync conditioning if the model supports it. Narration stays on a separate audio asset and should not make visible characters speak.
 

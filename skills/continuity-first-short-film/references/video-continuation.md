@@ -37,6 +37,8 @@ Every continuation node must receive:
 5. the exact approved dialogue audio when the tool uses audio for lip-sync conditioning;
 6. an explicit next-shot action and camera instruction from the canonical manifest.
 
+The continuation instruction must contain one definite action path and one definite camera path. Do not include alternative outcomes, optional gestures, approximate timing, or uncertain language. Resolve those decisions in the manifest before creating the continuation node.
+
 Narration remains a separate audio asset and must not make visible characters speak. A source video never becomes a character master, scene master, voice master, or final-audio source.
 
 If native continuation cannot accept required locked character or scene references, mark the shot `NATIVE_CONTINUATION_UNSAFE` and generate it independently.

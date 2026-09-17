@@ -56,6 +56,10 @@ Do not infer missing rows from a summary-only manifest. Recover or create a comp
 - Do not regenerate locked assets or successful shots to fix an unrelated failure.
 - Do not treat ordinary reference-video generation as native continuation. Inspect the live component and record whether the mode is `NATIVE_CONTINUATION` or `VIDEO_REFERENCE`.
 - Do not chain continuation automatically. Human-review and lock each result before it becomes the source of the next continuation.
+- Make every prompt sent to a video-generation node deterministic. Resolve all creative choices before submission. Never ask the model to choose between actions, cameras, compositions, emotions, timings, or asset states.
+- Reject video prompts containing ambiguous alternatives or uncertainty, including terms such as `可能`, `或者`, `或许`, `也许`, `大概`, `似乎`, `尽量`, `适当`, `maybe`, `perhaps`, `possibly`, `either`, or `or`. Rewrite them as one exact instruction. Lists of prohibited elements must also use separate statements instead of alternatives joined by `or`.
+- When the final prompt is available as local text, run `scripts/check_video_prompt.py <prompt-file>` before submission. Treat a nonzero result as a video-generation blocker.
+- Mark `PROMPT_CERTAINTY_CHECK = PASS` before video generation. If the intended action or camera is unresolved, mark `VIDEO_BLOCKED_BY_AMBIGUOUS_PROMPT` and stop rather than generating candidates from a vague prompt.
 
 ## Separate the gates
 
@@ -69,7 +73,7 @@ When a batch contains a blocker, continue only with an unbroken prefix or with i
 
 Prefer scene-local batches of up to roughly six atomic shots unless the user chooses another batch size. For each batch:
 
-1. Preflight against the canonical manifest and asset registry.
+1. Preflight against the canonical manifest and asset registry, then verify that every video prompt makes one exact choice for action, camera, composition, timing, and asset state.
 2. Generate and verify dry voices.
 3. Wait for human audio approval.
 4. Resolve missing props and choose `INDEPENDENT` or `NATIVE_CONTINUATION` for each shot. Use a tail frame only when continuation is unavailable and hard composition continuity still requires it.
