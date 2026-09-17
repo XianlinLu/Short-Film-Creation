@@ -57,10 +57,10 @@
 skills/continuity-first-short-film/
 ├── SKILL.md
 ├── agents/openai.yaml
-├── scripts/check_video_prompt.py
 └── references/
     ├── workflow.md
     ├── video-continuation.md
+    ├── video-prompt-certainty.md
     ├── entry-scenarios.md
     ├── production-schema.md
     ├── prompt-templates.md
@@ -133,12 +133,6 @@ cp -R skills/continuity-first-short-film ~/.codex/skills/
 9. **每一次续写都要人工确认后才能继续下一次。**
 10. **每条视频提示词只能有一个确定方案；模糊表达必须在生成前被阻止。**
 11. **只重跑失败镜头，不重跑整批成功镜头。**
-
-本地提示词可以使用确定性检查脚本：
-
-```bash
-python3 skills/continuity-first-short-film/scripts/check_video_prompt.py prompt.txt
-```
 
 ## 适用范围
 

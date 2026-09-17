@@ -57,10 +57,10 @@ Even during continuation, the next shot reconnects locked character, scene, prop
 skills/continuity-first-short-film/
 ├── SKILL.md
 ├── agents/openai.yaml
-├── scripts/check_video_prompt.py
 └── references/
     ├── workflow.md
     ├── video-continuation.md
+    ├── video-prompt-certainty.md
     ├── entry-scenarios.md
     ├── production-schema.md
     ├── prompt-templates.md
@@ -133,12 +133,6 @@ The skill can also be selected automatically when a request clearly concerns mul
 9. **Every continuation is human-reviewed before another continuation may start.**
 10. **Every video prompt makes one exact choice; vague alternatives are blocked before generation.**
 11. **Only failed shots are regenerated.**
-
-To check a local prompt deterministically:
-
-```bash
-python3 skills/continuity-first-short-film/scripts/check_video_prompt.py prompt.txt
-```
 
 ## Scope
 
