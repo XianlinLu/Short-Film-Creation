@@ -1,0 +1,4 @@
+interface:
+  display_name: "Continuity-First Short Film"
+  short_description: "Plan and produce consistent AI short films"
+  default_prompt: "Use $continuity-first-short-film to turn my script into a gated, continuity-safe production workflow."
