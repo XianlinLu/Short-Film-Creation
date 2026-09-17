@@ -1,4 +1,4 @@
-# Continuity-First AI Short Film Creation
+# AI Short Film Creation
 
 [中文说明](README_zh-CN.md)
 
