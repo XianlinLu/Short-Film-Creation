@@ -1,6 +1,6 @@
 # Continuity-First AI Short Film Creation
 
-[中文说明](README.zh-CN.md)
+[中文说明](README_zh-CN.md)
 
 This repository contains a reusable skill for planning and producing multi-shot AI short films without losing character identity, voice identity, props, locations, or shot continuity.
 
