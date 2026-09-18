@@ -19,6 +19,19 @@ Reject: 她可能转身，或者看向窗外，镜头或许缓慢推进。
 Use: 她向右转身，看向窗外。镜头沿直线缓慢推进，持续 5 秒。
 ```
 
+## Prompt names materials but does not bind them
+
+Do not submit the video node. A typed asset name, including text beginning with `@`, does not attach media to the model.
+
+1. Read the shot's `REQUIRED_MATERIALS` from the canonical manifest.
+2. Remove plain-text pseudo-mentions such as `@ASSET_NAME`, `图2=...`, and `音频1=...`.
+3. Invoke Lumina's native `@` material selector for each required image, audio, or source video and choose the exact approved media result.
+4. Add structured input connections when the live node schema requires them.
+5. Read the node back and compare actual bound asset IDs, media types, and roles with the manifest.
+6. Mark `MATERIAL_BINDING_CHECK = PASS` only when no pseudo-mention, missing binding, unexpected binding, or type mismatch remains.
+
+If the agent's available operation cannot create a native binding, mark `VIDEO_BLOCKED_BY_UNBOUND_MATERIAL` and request manual binding for the exact asset IDs. Never pretend that typing the asset name completed the binding.
+
 ## Voice changes between shots
 
 Likely cause: each TTS node generated a fresh voice from text instructions.

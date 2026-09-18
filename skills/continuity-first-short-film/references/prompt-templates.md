@@ -13,6 +13,8 @@ Create <BATCH_PRECHECK_NODE>. For each shot record exact dialogue, speaker, voic
 
 Write the final VIDEO_PROMPT for every shot as a deterministic instruction with one action, one camera path, one composition, exact timing, exact asset states, and explicit mouth behavior. Reject any prompt containing uncertain or alternative language, including 可能、或者、或许、也许、大概、似乎、尽量、适当、maybe、perhaps、possibly、either、or. If any creative choice is unresolved, mark VIDEO_BLOCKED_BY_AMBIGUOUS_PROMPT. Set PROMPT_CERTAINTY_CHECK = PASS only after rewriting the prompt into one exact executable choice.
 
+For every image, audio, or video named by the manifest, require a real Lumina material binding. Native bindings must be created with the actual `@` material selector or an equivalent structured operation that creates the same bound token inside the final prompt. Plain text such as `@ASSET_NAME`, `图2=ASSET_NAME`, or `音频1=ASSET_NAME` is invalid. Record REQUIRED_MATERIALS, ACTUAL_BOUND_MATERIALS, PLAIN_TEXT_PSEUDO_MENTIONS, MISSING_BINDINGS, UNEXPECTED_BINDINGS, TYPE_MISMATCHES, and MATERIAL_BINDING_CHECK. If the actual bindings cannot yet be read because this is a no-media preflight, set MATERIAL_BINDING_CHECK = PENDING_NODE_BINDING rather than PASS.
+
 Missing visual assets block video but do not block valid audio. Do not generate media in this run. Stop after writing and verifying the preflight.
 ```
 
@@ -34,6 +36,8 @@ The user has approved the batch's formal audio. Mark those nodes APPROVED / LOCK
 Recheck video gates. Generate each executable shot as an independent short clip in dependency order. On every shot, reconnect its actual locked character image and locked scene image, then add only the required locked props and approved dialogue audio. A predecessor tail frame may also be connected, but only to control composition, camera, pose, and spatial layout; it never replaces character, costume, scene, or prop references.
 
 Before creating each video node, verify PROMPT_CERTAINTY_CHECK = PASS. The prompt must contain one exact action, camera path, composition, duration, character state, prop state, and mouth rule. Do not submit prompts containing alternatives, approximation, optional behavior, or uncertainty. Do not let the video model choose.
+
+Insert every required character image, scene image, prop image, continuity frame, and approved dialogue audio into the final prompt with Lumina's native `@` material selector. Select the actual media result; do not type `@` plus its name. Create required input connections as well when the node schema requires them. Read the completed node back and compare its stored bindings with the manifest. Generate only when MATERIAL_BINDING_CHECK = PASS. If the selector or binding operation is unavailable, mark VIDEO_BLOCKED_BY_UNBOUND_MATERIAL, report the exact missing bindings, and stop.
 
 Only the character speaker may move their mouth; narration stays separate and keeps visible characters' mouths closed. Do not add text, subtitles, watermarks, extra people, or extra dialogue. Treat native video audio as TEMP_PREVIEW_AUDIO / NOT_FOR_FINAL_MIX and always replace it with approved narration and dialogue in the final mix.
 
@@ -60,6 +64,8 @@ First verify that <SOURCE_VIDEO_ID> has a real human-approved locked video outpu
 If all checks pass, create <NEXT_SHOT_ID>_CONTINUATION_V1. Connect <SOURCE_VIDEO_ID> only as motion, composition, pacing, camera, pose, and spatial-continuity input. Reconnect the locked image for every on-screen character, the locked scene master, and only the required locked prop/costume references. Never use the source video as character, scene, prop, or voice identity.
 
 Verify PROMPT_CERTAINTY_CHECK = PASS. The continuation prompt must state one exact next action, one exact camera path, one composition, and exact timing. It must not contain possible outcomes, alternative actions, optional gestures, approximate duration, or ambiguous terms.
+
+Use Lumina's native `@` material selector to bind the actual source video, every required locked image, and approved dialogue audio. A typed asset name is invalid. Read the node back and verify the exact IDs and media types. Generate only when MATERIAL_BINDING_CHECK = PASS.
 
 For character dialogue, connect the exact approved dry dialogue <DIALOGUE_AUDIO_ID> only if the continuation node supports audio lip-sync conditioning. For narration, do not feed narration into visible mouths; keep <NARRATION_AUDIO_ID> separate. Do not invent or regenerate dialogue. Preserve one primary action and one primary camera movement.
 
@@ -93,6 +99,8 @@ Register it APPROVED_COMPOSITION_FRAME / LOCKED / FOR_<NEXT_SHOT>_ONLY / DO_NOT_
 
 同时为每一镜写出最终 VIDEO_PROMPT。提示词必须只有一个明确动作、一个明确机位运动、一个明确构图、精确时长、确定的角色与道具状态，以及明确口型规则。禁止出现“可能、或者、或许、也许、大概、似乎、尽量、适当”等模糊词，禁止让模型在多个方案中自行选择。存在未决选择时标记 VIDEO_BLOCKED_BY_AMBIGUOUS_PROMPT；全部改成唯一确定指令后才标记 PROMPT_CERTAINTY_CHECK = PASS。
 
+Manifest 中出现的每一张图片、每一条音频和每一段视频都必须形成 Lumina 真实素材绑定。必须使用原生 `@` 素材选择器，或使用能够在最终提示词内部创建同类绑定 token 的等效结构化操作，并选择实际素材结果。手工输入 `@素材名`、`图2=素材名`、`音频1=素材名`一律无效。预检记录 REQUIRED_MATERIALS；由于本轮尚未创建视频节点，MATERIAL_BINDING_CHECK 只能标记 PENDING_NODE_BINDING，不能提前标记 PASS。
+
 缺少视觉资产只阻塞视频，不阻塞有效音频。本轮不生成媒体，写完并验证预检后停止。
 ```
 
@@ -110,6 +118,8 @@ Register it APPROVED_COMPOSITION_FRAME / LOCKED / FOR_<NEXT_SHOT>_ONLY / DO_NOT_
 用户已确认本批正式音频。锁定音频后重新检查视频门禁，把每个镜头作为独立短视频生成。每一镜都必须重新连接实际出场角色图和锁定场景图，再连接必要道具与角色对白音频。上一镜尾帧只能控制构图、机位、姿态和空间关系，不能替代角色图、场景图或道具图。
 
 创建视频节点前必须确认 PROMPT_CERTAINTY_CHECK = PASS。视频提示词只能描述一个确定动作、一个确定机位运动、一个确定构图、精确时长、确定角色状态、确定道具状态和明确口型。禁止“可能、或者、或许、也许、大概、似乎、尽量、适当”等措辞；禁止提供备选方案；禁止让视频模型自行决定。
+
+最终提示词中涉及的角色图、场景图、道具图、连续性尾帧和已确认对白音频，必须逐项调用 Lumina 原生 `@` 素材选择器并选择实际素材结果。禁止手工输入 `@` 加素材名称，禁止只写 `图1/图2/音频1` 与素材名的文字映射。节点结构要求输入连线时还必须建立真实连线。创建后重新读取节点，核对真实绑定的素材 ID、类型和用途；只有 MATERIAL_BINDING_CHECK = PASS 才能提交生成。无法建立真实绑定时标记 VIDEO_BLOCKED_BY_UNBOUND_MATERIAL，列出缺失素材后停止。
 
 只有说话角色动嘴；旁白保持独立，旁白画面人物闭口。禁止字幕、文字、水印、额外人物和额外对白。视频原生音轨只作预览，最终必须静音并替换为已确认的旁白和对白轨。缺少真实尾帧时停止，不得伪造。生成后标记 GENERATED / MANUAL_QA_PENDING，等待人工验收。
 ```
@@ -132,6 +142,8 @@ Register it APPROVED_COMPOSITION_FRAME / LOCKED / FOR_<NEXT_SHOT>_ONLY / DO_NOT_
 通过后创建 <下一镜头 ID>_CONTINUATION_V1。把 <源视频 ID> 仅作为动作、构图、节奏、机位、姿态和空间连续参考；同时重新连接本镜实际出场角色的锁定角色图、锁定场景图，以及必要的锁定道具和服装状态图。源视频不能替代任何身份资产或声音母带。
 
 创建节点前必须确认 PROMPT_CERTAINTY_CHECK = PASS。续写提示词必须明确下一步唯一动作、唯一机位运动、确定构图与精确时长；禁止可能结果、替代动作、可选表演和近似时间；禁止任何模糊词。
+
+必须使用 Lumina 原生 `@` 素材选择器实际绑定源视频、全部必要锁定图片和已确认对白音频。手工输入素材名称无效。创建节点后重新读取绑定的素材 ID 与媒体类型，只有 MATERIAL_BINDING_CHECK = PASS 才能提交续写。
 
 角色说话镜头只有在续写节点支持音频驱动口型时，才连接已经确认的干声 <对白音频 ID>；旁白 <旁白音频 ID> 保持独立，不驱动画面人物开口。不得重新生成或改写对白。
 

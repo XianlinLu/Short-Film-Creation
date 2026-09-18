@@ -29,6 +29,7 @@ Script
   -> separate narration and character-dialogue generation
   -> independent short shot OR eligible controlled continuation
   -> character image + scene image reattached in either mode
+  -> every image/audio/video reference inserted as a real native @ material binding
   -> predecessor video controls motion/composition only
   -> tail frame used only as a hard-continuity fallback
   -> human visual and continuity approval
@@ -61,6 +62,7 @@ skills/continuity-first-short-film/
     ├── workflow.md
     ├── video-continuation.md
     ├── video-prompt-certainty.md
+    ├── material-binding.md
     ├── entry-scenarios.md
     ├── production-schema.md
     ├── prompt-templates.md
@@ -79,6 +81,7 @@ skills/continuity-first-short-film/
 - reattaching character, scene, and required prop references in either generation mode;
 - preserving character voice with locked voice masters or approved shot dialogue instead of predecessor-video audio;
 - blocking video prompts that contain uncertain language or unresolved alternatives;
+- requiring real native material bindings instead of typed `@ASSET_NAME`, image aliases, or audio aliases;
 - using real tail frames only for composition, camera, pose, and spatial continuity;
 - keeping narration and character dialogue as separate approved tracks;
 - generating copy-ready English and Chinese canvas-agent prompts;
@@ -132,7 +135,8 @@ The skill can also be selected automatically when a request clearly concerns mul
 8. **Identity comes from locked assets, not names, seeds, tail frames, or predecessor soundtracks.**
 9. **Every continuation is human-reviewed before another continuation may start.**
 10. **Every video prompt makes one exact choice; vague alternatives are blocked before generation.**
-11. **Only failed shots are regenerated.**
+11. **Every referenced image, audio, and source video is an actual native material binding, not typed text.**
+12. **Only failed shots are regenerated.**
 
 ## Scope
 

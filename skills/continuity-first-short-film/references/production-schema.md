@@ -56,6 +56,9 @@ Every canonical version must contain the complete shot table, not only changes. 
 | `CAMERA` | One primary camera setup |
 | `VIDEO_PROMPT` | Final deterministic prompt sent to the video node |
 | `PROMPT_CERTAINTY_CHECK` | `PASS` only when no unresolved alternative or uncertainty remains |
+| `REQUIRED_MATERIALS` | Exact asset ID, media type, and prompt role for every required binding |
+| `ACTUAL_BOUND_MATERIALS` | Bindings read back from the completed video node |
+| `MATERIAL_BINDING_CHECK` | `PASS` only when every required material is natively bound and verified |
 | `MOUTH_RULE` | Speaker only, all closed, or not applicable |
 | `CONTINUITY` | `HARD_CONTINUITY` or `SOFT_CONTINUITY` |
 | `PREDECESSOR` | Required prior shot |
@@ -88,6 +91,8 @@ AUDIO_BLOCKED
 VIDEO_READY
 VIDEO_BLOCKED
 VIDEO_BLOCKED_BY_AMBIGUOUS_PROMPT
+VIDEO_BLOCKED_BY_UNBOUND_MATERIAL
+PENDING_NODE_BINDING
 CONTINUATION_READY
 CONTINUATION_BLOCKED
 NATIVE_CONTINUATION_UNAVAILABLE
@@ -117,13 +122,16 @@ The report should include:
 - missing assets and real-tail-frame dependencies;
 - generation mode, native-continuation capability, approved source video, continuation round, and output mode;
 - the final video prompt and `PROMPT_CERTAINTY_CHECK` result;
+- required materials, actual native bindings, pseudo-mentions, missing bindings, type mismatches, and `MATERIAL_BINDING_CHECK` result;
 - actual generated node names and outputs;
 - the next required human decision;
 - a clear stopping condition.
 
 An absent formal audio output is `TO_GENERATE`, not inherently a blocker. A missing visual asset may block video while leaving audio ready.
 
-Every video row must name its character reference and scene reference even when a predecessor video or tail frame is attached. A continuation source or tail frame with no reattached identity references is a preflight failure. A source video with no true extension operation must be classified as `VIDEO_REFERENCE`, not `NATIVE_CONTINUATION`.
+During a no-media preflight, list `REQUIRED_MATERIALS` and use `PENDING_NODE_BINDING`; do not claim `PASS` before a real video node exists and its native bindings have been read back.
+
+Every video row must name its character reference and scene reference even when a predecessor video or tail frame is attached. Every named material must resolve to a real native binding; typed `@ASSET_NAME` text is not sufficient. A continuation source or tail frame with no reattached identity references is a preflight failure. A source video with no true extension operation must be classified as `VIDEO_REFERENCE`, not `NATIVE_CONTINUATION`.
 
 ## Approval semantics
 

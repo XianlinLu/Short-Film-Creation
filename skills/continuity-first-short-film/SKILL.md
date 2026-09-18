@@ -24,6 +24,7 @@ Always preserve this workflow unless the user explicitly changes it:
 - To choose the correct starting path for an idea, a script, or existing videos, read [references/entry-scenarios.md](references/entry-scenarios.md).
 - When creating or repairing manifests, registries, IDs, or statuses, read [references/production-schema.md](references/production-schema.md).
 - Before approving any final prompt for a video node, read [references/video-prompt-certainty.md](references/video-prompt-certainty.md).
+- Before creating a video node that uses image, audio, or video assets, read [references/material-binding.md](references/material-binding.md).
 - When the user needs copy-ready instructions for a canvas agent, read [references/prompt-templates.md](references/prompt-templates.md).
 - When a run fails, a manifest is incomplete, a tail frame is unavailable, or native audio is blocked, read [references/failure-playbook.md](references/failure-playbook.md).
 
@@ -61,6 +62,8 @@ Do not infer missing rows from a summary-only manifest. Recover or create a comp
 - Reject video prompts containing ambiguous alternatives or uncertainty, including terms such as `可能`, `或者`, `或许`, `也许`, `大概`, `似乎`, `尽量`, `适当`, `maybe`, `perhaps`, `possibly`, `either`, or `or`. Rewrite them as one exact instruction. Lists of prohibited elements must also use separate statements instead of alternatives joined by `or`.
 - Apply the mandatory lexical and structural checks in [references/video-prompt-certainty.md](references/video-prompt-certainty.md) to the exact final `VIDEO_PROMPT` before submission.
 - Mark `PROMPT_CERTAINTY_CHECK = PASS` before video generation. If the intended action or camera is unresolved, mark `VIDEO_BLOCKED_BY_AMBIGUOUS_PROMPT` and stop rather than generating candidates from a vague prompt.
+- Every image, audio, and video asset referenced inside a video prompt must be a real Lumina material mention created through the native `@` material selector or an equivalent structured operation that creates the same bound in-prompt token. Plain text such as `@ASSET_NAME`, `图2=ASSET_NAME`, or `音频1=ASSET_NAME` is not a binding. A canvas edge alone does not replace the in-prompt material mention.
+- Verify the actual bound asset IDs and media types before submission. Mark `MATERIAL_BINDING_CHECK = PASS` only when every required asset has a real binding, no plain-text pseudo-mention remains, and no unrelated asset is bound. Otherwise mark `VIDEO_BLOCKED_BY_UNBOUND_MATERIAL` and stop.
 
 ## Separate the gates
 
@@ -74,7 +77,7 @@ When a batch contains a blocker, continue only with an unbroken prefix or with i
 
 Prefer scene-local batches of up to roughly six atomic shots unless the user chooses another batch size. For each batch:
 
-1. Preflight against the canonical manifest and asset registry, then verify that every video prompt makes one exact choice for action, camera, composition, timing, and asset state.
+1. Preflight against the canonical manifest and asset registry, verify that every video prompt makes one exact choice, and verify that every required image, audio, and video reference is an actual material binding rather than typed text.
 2. Generate and verify dry voices.
 3. Wait for human audio approval.
 4. Resolve missing props and choose `INDEPENDENT` or `NATIVE_CONTINUATION` for each shot. Use a tail frame only when continuation is unavailable and hard composition continuity still requires it.
